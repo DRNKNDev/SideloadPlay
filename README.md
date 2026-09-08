@@ -10,11 +10,6 @@ those are issued by hand to developers we approach directly. There is no
 sign-up. If you don't have one, the rest of this still tells you what
 publishing involves.
 
-This repository holds the public parts: the launcher's releases, the listing
-skill, and this file. The launcher and API source are private for now, because
-Sideload runs other people's game code and that has not had the review it
-would need before opening up.
-
 ## Installing the launcher
 
 Download the latest `.dmg` from
@@ -60,6 +55,4 @@ only by reading it from standard input.
 ## Reporting a problem
 
 Open an [issue](https://github.com/DRNKNDev/SideloadPlay/issues). A launcher
-crash, a failed publish, a listing that renders wrong: all of it belongs here,
-even though the code at fault usually lives in a repository you cannot see.
-Its issues have nowhere else public to go.
+crash, a failed publish, a listing that renders wrong: all of it belongs here.
