@@ -22,7 +22,9 @@ Download the latest `.dmg` from
 has notes saying what changed. macOS on Apple Silicon only, for now.
 
 Builds are signed and notarized, so Gatekeeper opens them without complaining.
-They do not update themselves yet, so come back here for the next version.
+After that the launcher keeps itself up to date: a new version downloads in the
+background and is applied when you next quit, so you should not need this page
+again.
 
 ## Publishing a game
 
