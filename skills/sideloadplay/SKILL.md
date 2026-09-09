@@ -224,8 +224,15 @@ token, no network access, and nothing uploaded. It is the same verdict
 `publish` will reach for the same directory, so there's no reason not to run
 it repeatedly while you fix things.
 
-Each failure prints as one line, `<id>: expected <expected>, actual <actual>`,
-and the same data is available as JSON with `--json` — an array of
+Failures print as a summary line followed by one bulleted line per failure:
+
+```
+17 checks failed:
+- schema.title: expected type string, actual missing
+- schema.short_description: expected type string, actual missing
+```
+
+The same data is available as JSON with `--json` — an array of
 `{ id, actual, expected }` objects, meant for a script or an agent to act on
 directly rather than parse out of prose. When everything passes, it also
 previews what `publish` would do next: submit for review, or create a draft

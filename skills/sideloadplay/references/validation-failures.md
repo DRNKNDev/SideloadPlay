@@ -8,14 +8,14 @@ don't invent an id that isn't here.
 
 | id | Means |
 |---|---|
-| `schema.<field.path>` | `sideload.json` fails schema validation at `<field.path>` — wrong type, a string outside its length limit, a value not matching a required pattern, or an enum value that isn't one of the allowed ones. The path uses dots for nesting, e.g. `schema.developer.name`, `schema.requires.network`. |
+| `schema.<field.path>` | `sideload.json` fails schema validation at `<field.path>` — wrong type, a string outside its length limit, a value not matching a required pattern, or an enum value that isn't one of the allowed ones. The path uses dots for nesting, e.g. `schema.developer.name`, `schema.requires.network`. Array entries appear as a zero-based index segment, e.g. `schema.tags.0`, `schema.screenshots.2`. |
 
 Common ones you'll actually hit:
 
 - `schema.slug` — doesn't match the lowercase-hyphenated pattern, or is empty / over 64 characters.
 - `schema.title` / `schema.short_description` / `schema.description` — over their length limit (60 / 140 / 4,000 characters).
 - `schema.version` — not valid semver (`1.10` instead of `1.10.0`, for example).
-- `schema.tags` — an entry not in the fixed vocabulary, or an empty/over-5 array.
+- `schema.tags` — an empty or over-5 array; `schema.tags.<n>` (e.g. `schema.tags.0`) for an entry not in the fixed vocabulary.
 - `schema.engine` / `schema.renderer` / `schema.controller_support` / `schema.lifecycle` / `schema.content_rating` — a value outside that field's enum.
 - `schema.input` — an empty array, or an entry that isn't `keyboard`, `mouse`, `gamepad`, or `touch`.
 - `schema.estimated_playtime_min` — missing, not an integer, or not positive.
