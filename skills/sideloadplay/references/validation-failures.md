@@ -19,7 +19,8 @@ Common ones you'll actually hit:
 - `schema.engine` / `schema.renderer` / `schema.controller_support` / `schema.lifecycle` / `schema.content_rating` — a value outside that field's enum.
 - `schema.input` — an empty array, or an entry that isn't `keyboard`, `mouse`, `gamepad`, or `touch`.
 - `schema.estimated_playtime_min` — missing, not an integer, or not positive.
-- `schema.developer.name` — missing (the only required field inside `developer`).
+- `schema.developer.name` — missing, empty, or only whitespace (the only required field inside `developer`).
+- `schema.developer.<website_url|source_url|upstream_url>` — present but not a valid HTTP(S) URL.
 - `schema.requires.<pointer_lock|fullscreen|network|shared_array_buffer>` — one of the four is missing or not a boolean. All four are required with no default.
 - `schema.size.initial_load_mb` / `schema.size.total_mb` — missing or not a number.
 
@@ -30,8 +31,15 @@ of allowed values.
 
 ## Structural failures
 
+Referenced paths must resolve to regular files inside the canonical build root.
+Absolute paths, traversal (including encoded traversal) and escaping symlinks
+fail the same structural checks as missing files; the failure's `actual` value
+provides the diagnostic. `manifest_unreadable` also covers unsafe manifest paths.
+
+
 | id | Means |
 |---|---|
+| `file_unreadable` | A file changed or became unreadable during inspection or packaging; expected readable regular files inside the build directory. |
 | `entry_file_missing` | The file named by `entry_file` (default `index.html`) does not exist in the build directory. |
 | `description_file_missing` | `description` names a path ending in `.md`, but that file doesn't exist relative to `sideload.json`. |
 | `description_length` | The resolved description text — inline, or read from the `.md` file — exceeds 4,000 characters. For a file reference, this is checked against what the file actually contains, not the length of the path string. |

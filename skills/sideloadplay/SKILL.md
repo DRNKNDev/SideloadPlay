@@ -44,9 +44,14 @@ Once `validate` passes, this skill's job is done. What comes next is the
 developer's own, on the command line, not something to script on their behalf:
 
 ```sh
+npx sideloadplay dev <dir> --listing
 npx sideloadplay login    # once, reading an invite token from standard input
 npx sideloadplay publish <dir>
 ```
+
+Use `dev <dir> --listing` to preview Markdown, creator credits and artwork in
+the Launcher, then choose **Play** to test the game. Plain `dev <dir>` launches
+gameplay directly. Neither command uploads anything; publish after testing.
 
 ## Authoring sideload.json
 
@@ -93,7 +98,9 @@ relative to `sideload.json`. Use a file once it runs past a couple of lines — 
 4,000-character description is not something to hand-edit inside a JSON string.
 
 **Paths under `assets`** resolve relative to `sideload.json`, wherever that file
-sits in the build directory.
+sits in the build directory. Entry, description and asset files must remain
+inside the prepared directory: absolute paths, traversal and escaping symlinks
+are rejected.
 
 **`size`** is what the listing shows a player before they launch:
 `initial_load_mb` is what must arrive before the game is playable,
@@ -104,19 +111,32 @@ launcher enforces it: with `false`, every outbound request at runtime is blocked
 except to the game's own origin. Set `true` if the game calls anything — a
 leaderboard, an analytics beacon, a CDN font — even once. `false` is a promise
 the container keeps for you, not a setting the game can quietly outgrow.
+Currently `true` alone does not grant arbitrary network origins: the manifest
+has no origin allowlist field. Bundle runtime dependencies locally; test any
+required external service in the launcher rather than assuming it is allowed.
 
 **Never invent a value the developer has not given you** — a playtime, a content
 rating, a tag that merely sounds right for the genre. `estimated_playtime_min`,
 `content_rating` and `tags` are judgement calls about the game, not facts you can
-read out of its code. Ask, or leave them.
+read out of its code. All three are required: get an informed decision from the
+developer when context does not establish them, and keep the listing incomplete
+until supplied. `tags` needs 1–5 values from the schema vocabulary;
+`content_rating` is `everyone`, `teen`, or `mature`; `estimated_playtime_min` is
+a positive whole-minute estimate for a whole playthrough, not a typical session.
+
+**`developer`** credits the game's creator; publishing account ownership comes
+from authentication. Supply a nonempty `name`. Optional `website_url`,
+`source_url` (the shipped version's repository) and `upstream_url` (an original
+repository, when applicable) must be HTTP(S) URLs. Preserve original credits and
+license notices. Do not author a publisher/owner field to transfer a listing.
 
 ## Artwork
 
 Everything raster is 16:9 at exactly **1920×1080** — cover, hero, and every
 screenshot, no exceptions and no "close enough." The logo is the only asset
 with different dimensions: a transparent PNG that fits **within 1200×400**
-(it does not have to fill that box, just not exceed it). Every file, other
-than the trailer, is capped at **5 MB**.
+(it does not have to fill that box, just not exceed it). Each artwork file is
+capped at **5 MB**.
 
 | Asset | Dimensions | Format | Required |
 |---|---|---|---|
@@ -124,7 +144,6 @@ than the trailer, is capped at **5 MB**.
 | Screenshots | exactly 1920×1080 | PNG or JPEG | 3 to 8 |
 | Hero | exactly 1920×1080 | PNG or JPEG | optional |
 | Logo | within 1200×400 | PNG, transparent | optional |
-| Trailer | MP4, 1080p, ≤2 min | — | optional |
 
 A cover is required to leave `draft`. **Three screenshots is the minimum** that
 gets a listing into review — fewer than three, and it stays a draft no matter
@@ -179,7 +198,18 @@ A bundler does this for you. If your build ships unbundled ES modules with a
 hand-written import map — common in small Three.js projects — the rewrite is
 yours to do as a build step.
 
-### A build is served one directory down
+### Inline styles are subject to CSP too
+
+The game policy has no `unsafe-inline` for styles. A `<style>` element or
+`style="..."` attribute can be blocked even when JavaScript bundles correctly.
+Move static CSS into a same-origin stylesheet loaded with `<link>`. For runtime
+UI prefer classes backed by that stylesheet; check libraries that inject style
+text or set `cssText`/style attributes. Direct CSSOM property assignments behave
+differently from inline style text, so verify the actual runtime inside the
+launcher instead of treating every style mutation alike. Do not relax CSP to
+make a game pass.
+
+### A build is served under a nested path
 
 A build is served at `/g/<gameId>/<buildId>/`, never at an origin root —
 `sideload dev` serves it the same way on purpose, so this surfaces before
@@ -253,6 +283,13 @@ yourself and watched it pass.** A listing that "should be fine" based on
 reading `sideload.json` is not verified — dimensions, byte sizes, and schema
 shape are exactly the kind of thing that's wrong by a pixel or a missing file
 even when everything reads correctly.
+
+Validation establishes package readiness, not tested gameplay or full controller
+support. The developer can use `npx sideloadplay dev <dir> --listing` to inspect
+Markdown, credits and artwork, then Play, or choose the same prepared directory
+from Settings → Run a local game. A native folder picker uses keyboard/mouse;
+launcher-owned preview and recent-folder actions support controllers. Neither
+preview uploads anything.
 
 ## Never
 

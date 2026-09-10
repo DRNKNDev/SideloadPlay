@@ -104,6 +104,27 @@ pause, or two menus stack: the launcher's overlay on top, the game's underneath,
 waiting. A flag set in the pause handler and cleared in the resume handler is
 enough.
 
+## Audio from controller start and resume
+
+The launcher permits ordinary HTML media and Web Audio playback without a mouse
+or keyboard gesture. It cannot run audio initialization hidden exclusively in a
+`click` or `pointerdown` handler. Route controller, keyboard and pointer start
+commands through the same game action, creating/resuming the `AudioContext` and
+starting media there. Handle rejected playback/resume promises; ordinary
+browsers can still impose their own gesture restrictions.
+
+If lifecycle pause suspends audio, lifecycle resume should restore only what the
+pause suspended. Preserve the player's own mute/volume preference. The launcher
+also silences its container during loading, pause, disconnect and backgrounding;
+regaining focus while still paused does not resume sound. Pointer mode remains
+play and can be audible. Playback never needs microphone/camera permission.
+
+Test a fresh launch using only a controller: title screen → start → gameplay
+sound, launcher pause/resume, disconnect/reconnect and focus loss/return. Check
+HTML media and Web Audio separately if the game uses both. A successful browser
+test or launcher autoplay setting alone does not establish this game's audio
+works.
+
 ## Movement and aiming
 
 **Apply the dead zone to the vector, not to each axis.** Sticks rest slightly off
@@ -147,6 +168,10 @@ From the submission checklist, all of it verifiable by playing:
 
 - Still playable with keyboard and mouse.
 - Gamepad input verified working **inside the launcher**, not only in a browser.
+- Controller-only title screen, menus, gameplay, restart and completion paths
+  tested before declaring `full`; record any mouse-only path as `partial`.
+- Audio starts from the controller action, lifecycle resumes correctly, and
+  the player's mute/volume choices survive launcher pause/resume.
 - Survives a disconnect without crashing. Clear held input when the pad goes away,
   or the player walks forever.
 - Never uses the gamepad `index` as a persistent player identity. Indices are
